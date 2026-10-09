@@ -12,11 +12,23 @@ Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication 
 * Vues Blade : `bienvenue`, `heure` et `a-propos`.
 * Base de données SQLite locale (`database/database.sqlite`, non versionnée).
 
+## Routes disponibles
+
+| Méthode | URI              | Réponse                                                                |
+| ------- | ---------------- | ---------------------------------------------------------------------- |
+| GET     | `/`              | Vue `welcome` (page d'accueil par défaut de Laravel)                   |
+| GET     | `/bonjour`       | Chaîne de texte « Bonjour MDW3 ! Voici ma première route Laravel 13. » |
+| GET     | `/bonjour-court` | Chaîne de texte, écrite avec une fonction fléchée                      |
+| GET     | `/bienvenue`     | Vue `bienvenue` avec le nom de l'étudiant, le groupe et le cours       |
+| GET     | `/version`       | Chaîne avec la version de Laravel et celle de PHP                      |
+| GET     | `/heure`         | Vue `heure` avec l'heure (format H:i) et la date (format d/m/Y)        |
+| GET     | `/a-propos`      | Vue `a-propos` avec le nom de l'auteur et le groupe                    |
+
 ## Prérequis
 
-* PHP et Composer (PHP 8.3 ou plus depuis https://www.php.net/downloads, avec les extensions curl, fileinfo, mbstring, openssl, pdo_sqlite, sqlite3 et zip activées dans php.ini, et Composer depuis https://getcomposer.org).
-* Node.js LTS et npm.
-* Git.
+* PHP et Composer
+* Node.js LTS et npm
+* Git
 
 ## Installation
 
@@ -48,7 +60,7 @@ php artisan migrate
 composer run dev
 ```
 
-Ouvrir ensuite http://localhost:8000 (adresse de l'application, différente de l'adresse de Vite sur le port 5173).
+Ouvrir ensuite http://localhost:8000.
 
 ## Captures d'écran
 
