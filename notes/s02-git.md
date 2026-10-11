@@ -30,3 +30,10 @@ On peut le recréer avec composer install grâce au fichier composer.lock.
 Réponse :
 Git Credential Manager garde le token GitHub dans le Gestionnaire d’identifiants Windows.
 Sur un PC universitaire ou partagé, il faut supprimer le token à la fin du travail.
+## 6. Historique depuis lab-01
+
+Nombre de commits depuis lab-01 : 5.
+
+Fichiers modifiés depuis lab-01 : 5 (`README.md`, `notes/s02-git.md`, `resources/views/a-propos.blade.php`, `routes/web.php`, `screenshots/s02-a-propos.png`).
+
+Ce que `git tag -n` affiche pour `lab-01` : le tag `lab-01` suivi du message `lab-01`.
