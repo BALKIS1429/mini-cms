@@ -13,7 +13,7 @@ class PageController extends Controller
     {
         return view('a-propos', [
             'auteur' => 'Balkis Riahi',
-            'groupe' => 'MDW32',
+            'groupe' => 'MDW33',
         ]);
     }
 
