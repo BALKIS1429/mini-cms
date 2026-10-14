@@ -2,14 +2,15 @@
 
 Projet fil rouge de l'Atelier Framework Côté Serveur (Laravel 13, PHP 8.3+), 3e année MDW, ISET Sidi Bouzid.
 
-Auteur : Balkis Riahi, groupe MDW32.
+Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-02)
+## État actuel (tag lab-02b)
 
-- Routes nommées, toutes servies par des contrôleurs : `PageController` (pages) et `PostController` (articles).
-- Articles stockés dans un tableau PHP, sans base de données pour l'instant.
+- Pages construites avec des composants Blade anonymes : `x-navbar`, `x-nav-link`, `x-post-card`, `x-alert`, `x-page-header`.
+- Lien actif dans la navigation avec `request()->routeIs()`.
+- Articles toujours stockés dans un tableau PHP, sans base de données pour l'instant.
 - Layout Blade `<x-layout>` avec Tailwind chargé par Vite.
 - Base de données SQLite locale (`database/database.sqlite`, non versionnée).
 
@@ -60,7 +61,7 @@ php artisan migrate
 composer run dev
 ```
 
-Ouvrir ensuite http://localhost:8000.
+Ouvrir ensuite [http://localhost:8000](http://localhost:8000).
 
 ## Captures d'écran
 
@@ -80,10 +81,14 @@ Ouvrir ensuite http://localhost:8000.
 
 ![Page d'accueil avec le layout](screenshots/s03-accueil.png)
 
-### Liste des articles
+### Liste des articles — Session 03
 
 ![Liste des articles](screenshots/s03-articles.png)
 
 ### Détail d'un article
 
 ![Détail d'un article](screenshots/s03-article.png)
+
+### Session 04
+
+![Liste des articles](screenshots/s04-articles.png)
