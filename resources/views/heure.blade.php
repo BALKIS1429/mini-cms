@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heure - Mini-CMS</title>
-</head>
-<body>
-    <h1>Heure actuelle</h1>
+<x-layout>
+    <x-slot:title>Heure - Mini-CMS</x-slot:title>
 
-    <p>Heure : {{ $heure }}</p>
+    <h1 class="text-3xl font-bold">Heure actuelle</h1>
 
-    <p>Date : {{ $date }}</p>
-</body>
-</html>
+    <p class="mt-4 text-gray-700">Heure : {{ $heure }}</p>
+
+    <p class="mt-2 text-gray-700">Date : {{ $date }}</p>
+</x-layout>
