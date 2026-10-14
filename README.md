@@ -6,29 +6,29 @@ Auteur : Balkis Riahi, groupe MDW32.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-01b)
+## État actuel (tag lab-02)
 
-* Routes en closures : `/`, `/bonjour`, `/bonjour-court`, `/bienvenue`, `/version`, `/heure` et `/a-propos`.
-* Vues Blade : `bienvenue`, `heure` et `a-propos`.
-* Base de données SQLite locale (`database/database.sqlite`, non versionnée).
+- Routes nommées, toutes servies par des contrôleurs : `PageController` (pages) et `PostController` (articles).
+- Articles stockés dans un tableau PHP, sans base de données pour l'instant.
+- Layout Blade `<x-layout>` avec Tailwind chargé par Vite.
+- Base de données SQLite locale (`database/database.sqlite`, non versionnée).
 
 ## Routes disponibles
 
-| Méthode | URI              | Réponse                                                                |
-| ------- | ---------------- | ---------------------------------------------------------------------- |
-| GET     | `/`              | Vue `welcome` (page d'accueil par défaut de Laravel)                   |
-| GET     | `/bonjour`       | Chaîne de texte « Bonjour MDW3 ! Voici ma première route Laravel 13. » |
-| GET     | `/bonjour-court` | Chaîne de texte, écrite avec une fonction fléchée                      |
-| GET     | `/bienvenue`     | Vue `bienvenue` avec le nom de l'étudiant, le groupe et le cours       |
-| GET     | `/version`       | Chaîne avec la version de Laravel et celle de PHP                      |
-| GET     | `/heure`         | Vue `heure` avec l'heure (format H:i) et la date (format d/m/Y)        |
-| GET     | `/a-propos`      | Vue `a-propos` avec le nom de l'auteur et le groupe                    |
+| Méthode | URI | Nom | Action |
+|---|---|---|---|
+| GET | `/` | `home` | `PageController@home` |
+| GET | `/a-propos` | `about` | `PageController@about` |
+| GET | `/heure` | `time` | `PageController@time` |
+| GET | `/posts` | `posts.index` | `PostController@index` |
+| GET | `/posts/archive/{year}` | `posts.archive` | `PostController@archive` |
+| GET | `/posts/{slug}` | `posts.show` | `PostController@show` |
 
 ## Prérequis
 
-* PHP et Composer
-* Node.js LTS et npm
-* Git
+- PHP et Composer
+- Node.js LTS et npm
+- Git
 
 ## Installation
 
@@ -68,14 +68,22 @@ Ouvrir ensuite http://localhost:8000.
 
 ![Page d'accueil de Mini-CMS](screenshots/s01-accueil.png)
 
-### Page Bienvenue
-
-![Page Bienvenue](screenshots/s01-bienvenue.png)
-
 ### Liste des routes
 
 ![Sortie de php artisan route](screenshots/s01-route-list.png)
 
 ### Page À propos
 
-![Page A propos](screenshots/s02-a-propos.png)
+![Page À propos](screenshots/s02-a-propos.png)
+
+### Accueil avec le layout
+
+![Page d'accueil avec le layout](screenshots/s03-accueil.png)
+
+### Liste des articles
+
+![Liste des articles](screenshots/s03-articles.png)
+
+### Détail d'un article
+
+![Détail d'un article](screenshots/s03-article.png)
