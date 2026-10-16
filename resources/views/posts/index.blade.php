@@ -3,6 +3,8 @@
 
     <x-page-header :title="$heading" />
 
+    <a href="{{ route('posts.create') }}" class="inline-block mb-6 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Nouvel article</a>
+
     <div class="grid gap-6 md:grid-cols-2">
         @forelse ($posts as $post)
             <x-post-card :post="$post" />
