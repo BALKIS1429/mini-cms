@@ -1,12 +1,18 @@
 <?php
-
 namespace App\Http\Controllers;
+
+use App\Models\Post;
 
 class PageController extends Controller
 {
     public function home()
     {
-        return view('home');
+        return view('home', [
+            'latestPosts' => Post::where('is_published', true)
+                ->latest('published_at')
+                ->take(3)
+                ->get(),
+        ]);
     }
 
     public function about()
