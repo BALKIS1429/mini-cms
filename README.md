@@ -6,12 +6,13 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-02b)
+## État actuel (préparation de lab-03b)
 
-- Pages construites avec des composants Blade anonymes : `x-navbar`, `x-nav-link`, `x-post-card`, `x-alert`, `x-page-header`.
-- Lien actif dans la navigation avec `request()->routeIs()`.
-- Articles toujours stockés dans un tableau PHP, sans base de données pour l'instant.
-- Layout Blade `<x-layout>` avec Tailwind chargé par Vite.
+- CRUD des articles : liste, détail, création, modification et suppression avec confirmation.
+- Publication et dépublication depuis la page d'un article.
+- Champ `excerpt` facultatif ajouté par une nouvelle migration.
+- Scope `published` appliqué à l'accueil et aux archives.
+- Tests Pest de lecture et d'écriture : `php artisan test`.
 - Base de données SQLite locale (`database/database.sqlite`, non versionnée).
 
 ## Routes disponibles
@@ -23,7 +24,13 @@ Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication 
 | GET | `/heure` | `time` | `PageController@time` |
 | GET | `/posts` | `posts.index` | `PostController@index` |
 | GET | `/posts/archive/{year}` | `posts.archive` | `PostController@archive` |
-| GET | `/posts/{slug}` | `posts.show` | `PostController@show` |
+| GET | `/posts/create` | `posts.create` | `PostController@create` |
+| POST | `/posts` | `posts.store` | `PostController@store` |
+| GET | `/posts/{post}` | `posts.show` | `PostController@show` |
+| GET | `/posts/{post}/edit` | `posts.edit` | `PostController@edit` |
+| PUT/PATCH | `/posts/{post}` | `posts.update` | `PostController@update` |
+| DELETE | `/posts/{post}` | `posts.destroy` | `PostController@destroy` |
+| PATCH | `/posts/{post}/publication` | `posts.publication` | `PostController@togglePublication` |
 
 ## Prérequis
 
@@ -92,3 +99,9 @@ Ouvrir ensuite [http://localhost:8000](http://localhost:8000).
 ### Session 04
 
 ![Liste des articles](screenshots/s04-articles.png)
+
+### Session 06
+
+![Formulaire de modification prérempli](screenshots/s06-modification.png)
+
+![Confirmation de suppression](screenshots/s06-suppression.png)
