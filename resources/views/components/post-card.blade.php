@@ -1,3 +1,4 @@
+
 @props(['post'])
 
 <article class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 flex flex-col gap-3">
@@ -5,12 +6,15 @@
         <h2 class="text-lg font-semibold text-gray-900">
             <a href="{{ route('posts.show', $post) }}" class="hover:text-indigo-600">{{ $post->title }}</a>
         </h2>
+
         @if (! $post->is_published)
             <span class="text-xs font-medium bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">Brouillon</span>
         @endif
     </div>
 
-    <p class="text-sm text-gray-600">{{ Str::limit($post->body, 120) }}</p>
+    <p class="text-sm text-gray-600">
+        {{ $post->excerpt ?: Str::limit($post->body, 120) }}
+    </p>
 
     <p class="text-xs text-gray-500">
         @if ($post->published_at)

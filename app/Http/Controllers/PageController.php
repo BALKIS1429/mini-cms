@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Post;
@@ -8,7 +9,7 @@ class PageController extends Controller
     public function home()
     {
         return view('home', [
-            'latestPosts' => Post::where('is_published', true)
+            'latestPosts' => Post::published()
                 ->latest('published_at')
                 ->take(3)
                 ->get(),

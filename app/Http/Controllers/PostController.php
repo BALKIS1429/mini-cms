@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PostController extends Controller
@@ -21,7 +22,10 @@ class PostController extends Controller
     {
         return view('posts.index', [
             'heading' => 'Articles de '.$year,
-            'posts' => Post::whereYear('published_at', $year)->latest('id')->paginate(4),
+            'posts' => Post::published()
+                ->whereYear('published_at', $year)
+                ->latest('id')
+                ->paginate(4),
         ]);
     }
 
@@ -34,7 +38,14 @@ class PostController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9-]+$/', 'unique:posts,slug'],
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9-]+$/',
+                'unique:posts,slug',
+            ],
+            'excerpt' => ['nullable', 'string', 'max:255'],
             'body' => ['required', 'string', 'min:20'],
             'is_published' => ['nullable', 'boolean'],
         ]);
@@ -52,18 +63,56 @@ class PostController extends Controller
         return view('posts.show', compact('post'));
     }
 
-    public function edit(Post $post)
+    public function edit(Post $post): View
     {
-        //
+        return view('posts.edit', compact('post'));
     }
 
-    public function update(Request $request, Post $post)
+    public function update(Request $request, Post $post): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9-]+$/',
+                Rule::unique('posts', 'slug')->ignore($post->id),
+            ],
+            'excerpt' => ['nullable', 'string', 'max:255'],
+            'body' => ['required', 'string', 'min:20'],
+            'is_published' => ['nullable', 'boolean'],
+        ]);
+
+        $validated['is_published'] = $request->boolean('is_published');
+
+        if ($validated['is_published']) {
+            $validated['published_at'] = $post->published_at ?? now();
+        } else {
+            $validated['published_at'] = null;
+        }
+
+        $post->update($validated);
+
+        return redirect()->route('posts.show', $post);
     }
 
-    public function destroy(Post $post)
+    public function destroy(Post $post): RedirectResponse
     {
-        //
+        $post->delete();
+
+        return redirect()->route('posts.index');
+    }
+
+    public function togglePublication(Post $post): RedirectResponse
+    {
+        $isPublished = ! $post->is_published;
+
+        $post->update([
+            'is_published' => $isPublished,
+            'published_at' => $isPublished ? now() : null,
+        ]);
+
+        return redirect()->route('posts.show', $post);
     }
 }
