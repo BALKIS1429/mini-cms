@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'article - Mini-CMS</title>
+    <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" /><script type="module" src="http://[::1]:5173/resources/js/app.js"></script><script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://127.0.0.1:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+    const captureTypes = ["error","warning","info","log","debug","table"];
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        debug: console.debug,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Walk own enumerable keys so JSON.stringify cannot auto-invoke a proxy fake toJSON (e.g. Livewire's `$wire`) and fire a real request.
+    function toSafeValue(value, seen) {
+        if (value === null || typeof value !== 'object') {
+            return value;
+        }
+        if (value instanceof Error) {
+            return { name: value.name, message: value.message, stack: value.stack };
+        }
+        // Date has no own enumerable keys, so the walk below would collapse it to {}.
+        if (value instanceof Date) {
+            return value.toISOString();
+        }
+        if (seen.has(value)) {
+            return '[Circular]';
+        }
+        seen.add(value);
+        if (Array.isArray(value)) {
+            return value.map((item) => toSafeValue(item, seen));
+        }
+        const plain = {};
+        for (const key of Object.keys(value)) {
+            if (key === 'toJSON') continue;
+            try {
+                plain[key] = toSafeValue(value[key], seen);
+            } catch (e) {
+                plain[key] = '[Unreadable]';
+            }
+        }
+        return plain;
+    }
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        return JSON.stringify(toSafeValue(obj, new WeakSet()));
+    }
+
+    // Normalize log type for consistency (e.g., 'warn' to 'warning')
+    function normalizeType(type) {
+        return type === 'warn' ? 'warning' : type;
+    }
+
+    // Determine if a log type should be captured based on configured levels
+    function shouldCapture(type) {
+        return captureTypes.includes(normalizeType(type));
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'debug', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                if (!shouldCapture(method)) {
+                    return;
+                }
+
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            if (shouldCapture('error')) {
+                logQueue.push({
+                    type: 'uncaught_error',
+                    timestamp: new Date().toISOString(),
+                    data: [{
+                        message: errorMsg,
+                        filename: url,
+                        lineno: lineNumber,
+                        colno: colNumber,
+                        error: error ? {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack
+                        } : null
+                    }],
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            }
+
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: toSafeValue(event.reason, new WeakSet())
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+    <header class="bg-white border-b border-gray-200">
+    <nav class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center gap-2" aria-label="Navigation principale">
+        <a href="http://127.0.0.1:8000" class="font-bold text-lg text-indigo-600 mr-4">Mini-CMS</a>
+
+        <a
+    href="http://127.0.0.1:8000"
+        class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
+>
+    Accueil
+</a>
+        <a
+    href="http://127.0.0.1:8000/posts"
+     aria-current="page"     class="px-3 py-2 rounded-md text-sm font-medium transition-colors bg-indigo-600 text-white"
+>
+    Articles
+</a>
+        <a
+    href="http://127.0.0.1:8000/heure"
+        class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
+>
+    Heure
+</a>
+        <a
+    href="http://127.0.0.1:8000/a-propos"
+        class="px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
+>
+    À propos
+</a>
+    </nav>
+</header>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
+        <div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+
+        <div style="margin-bottom: 30px;">
+            <p style="color: #4f46e5; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                Mini-CMS / Articles
+            </p>
+
+            <h1 style="font-size: 32px; font-weight: 800; color: #111827; margin: 10px 0;">
+                Modifier l'article
+            </h1>
+
+            <p style="color: #6b7280; font-size: 16px;">
+                Modifiez les informations de l'article : Mon deuxième article
+            </p>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+
+            <form action="http://127.0.0.1:8000/posts/10" method="POST">
+    <input type="hidden" name="_token" value="VLG7vaCvZTw0NjKJStT8yqlrcXQL5ZJiLylkA9Qn" autocomplete="off">
+            <input type="hidden" name="_method" value="PUT">    
+    <div style="margin-bottom: 24px;">
+        <label for="title" style="display: block; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            Titre de l'article
+        </label>
+
+        <input
+            id="title"
+            name="title"
+            type="text"
+            value="Mon deuxième article"
+            placeholder="Exemple : Mon premier article"
+            required
+            maxlength="255"
+            style="display: block; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; color: #111827; background: #ffffff;"
+        >
+
+            </div>
+
+    <div style="margin-bottom: 24px;">
+        <label for="slug" style="display: block; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            Slug
+        </label>
+
+        <input
+            id="slug"
+            name="slug"
+            type="text"
+            value="mon-deuxieme-article"
+            placeholder="mon-premier-article"
+            required
+            maxlength="255"
+            pattern="[a-z0-9-]+"
+            style="display: block; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; color: #111827; background: #ffffff;"
+        >
+
+        <p style="font-size: 13px; color: #6b7280; margin-top: 6px;">
+            Utilisez uniquement des lettres minuscules, des chiffres et des tirets.
+        </p>
+
+            </div>
+
+    <div style="margin-bottom: 24px;">
+        <label for="excerpt" style="display: block; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            Extrait de l'article
+        </label>
+
+        <textarea
+            id="excerpt"
+            name="excerpt"
+            rows="3"
+            maxlength="500"
+            placeholder="Résumé court de l'article (facultatif)"
+            style="display: block; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; line-height: 1.6; color: #111827; background: #ffffff; resize: vertical;"
+        >Cet article présente les bases du développement web avec Laravel.</textarea>
+
+            </div>
+
+    <div style="margin-bottom: 24px;">
+        <label for="body" style="display: block; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            Contenu de l'article
+        </label>
+
+        <textarea
+            id="body"
+            name="body"
+            rows="8"
+            placeholder="Écrivez le contenu de votre article..."
+            required
+            minlength="20"
+            style="display: block; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; line-height: 1.6; color: #111827; background: #ffffff; resize: vertical;"
+        >Cet article explique les notions essentielles du développement web avec Laravel. Il présente la création des pages, la gestion des articles et l&#039;utilisation de la base de données.</textarea>
+
+            </div>
+
+    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 28px;">
+        <label for="is_published" style="display: flex; align-items: center; gap: 12px; color: #374151; font-weight: 600; cursor: pointer;">
+            <input
+                id="is_published"
+                name="is_published"
+                type="checkbox"
+                value="1"
+                checked                style="width: 18px; height: 18px; accent-color: #4f46e5;"
+            >
+            Publier immédiatement
+        </label>
+
+        <p style="font-size: 13px; color: #6b7280; margin: 8px 0 0 30px;">
+            Cochez cette option pour publier l'article dès son enregistrement.
+        </p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; border-top: 1px solid #e5e7eb; padding-top: 24px;">
+        <button
+            type="submit"
+            style="background: #4f46e5; color: #ffffff; padding: 14px 24px; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 700;"
+        >
+            Enregistrer les modifications
+        </button>
+
+        <a
+            href="http://127.0.0.1:8000/posts"
+            style="display: inline-block; background: #ffffff; color: #374151; padding: 13px 24px; border: 1px solid #d1d5db; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600;"
+        >
+            Annuler
+        </a>
+    </div>
+</form>
+
+        </div>
+
+        <p style="text-align: center; font-size: 13px; color: #9ca3af; margin-top: 20px;">
+            Mini-CMS — Gestion des articles
+        </p>
+
+    </div>
+    </main>
+
+    <footer class="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
+        Mini-CMS - Atelier Framework Côté Serveur - ISET Sidi Bouzid
+    </footer>
+</body>
+</html>
