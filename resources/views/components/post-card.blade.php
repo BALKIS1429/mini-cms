@@ -2,7 +2,8 @@
 @props(['post'])
 
 <article class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 flex flex-col gap-3">
-    <div class="flex items-center gap-2">
+
+    <div class="flex items-start justify-between gap-3">
         <h2 class="text-lg font-semibold text-gray-900">
             <a href="{{ route('posts.show', $post) }}" class="hover:text-indigo-600">{{ $post->title }}</a>
         </h2>
