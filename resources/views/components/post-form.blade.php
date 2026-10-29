@@ -1,10 +1,18 @@
 
 @props([
     'post' => null,
+    'categories',
+    'tags',
     'action',
     'method' => 'POST',
     'submitLabel' => 'Enregistrer l’article',
 ])
+
+@php
+    $selectedTags = session()->hasOldInput()
+        ? old('tags', [])
+        : ($post?->tags->pluck('id')->all() ?? []);
+@endphp
 
 <form action="{{ $action }}" method="POST">
     @csrf
@@ -97,6 +105,41 @@
             <p style="color: #dc2626; font-size: 14px; margin-top: 8px;">{{ $message }}</p>
         @enderror
     </div>
+
+    <div style="margin-bottom: 24px;">
+        <label for="category_id" style="display: block; font-weight: 700; color: #374151; margin-bottom: 8px;">
+            Catégorie
+        </label>
+        <select id="category_id" name="category_id" style="display: block; width: 100%; box-sizing: border-box; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; color: #111827; background: #ffffff;">
+            <option value="">Aucune catégorie</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}" @selected(old('category_id', $post?->category_id) == $category->id)>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('category_id')
+            <p style="color: #dc2626; font-size: 14px; margin-top: 8px;">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <fieldset style="margin-bottom: 24px;">
+        <legend style="font-weight: 700; color: #374151; margin-bottom: 8px;">Tags</legend>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+            @foreach ($tags as $tag)
+                <label style="display: flex; align-items: center; gap: 8px; color: #374151; font-size: 14px;">
+                    <input type="checkbox" name="tags[]" value="{{ $tag->id }}" @checked(in_array($tag->id, $selectedTags))>
+                    {{ $tag->name }}
+                </label>
+            @endforeach
+        </div>
+        @error('tags')
+            <p style="color: #dc2626; font-size: 14px; margin-top: 8px;">{{ $message }}</p>
+        @enderror
+        @error('tags.*')
+            <p style="color: #dc2626; font-size: 14px; margin-top: 8px;">{{ $message }}</p>
+        @enderror
+    </fieldset>
 
     <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 28px;">
         <label for="is_published" style="display: flex; align-items: center; gap: 12px; color: #374151; font-weight: 600; cursor: pointer;">

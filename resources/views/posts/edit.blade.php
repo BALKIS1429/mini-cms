@@ -22,6 +22,8 @@
 
             <x-post-form
                 :post="$post"
+                :categories="$categories"
+                :tags="$tags"
                 :action="route('posts.update', $post)"
                 method="PUT"
                 submit-label="Enregistrer les modifications"

@@ -21,6 +21,8 @@
         <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
 
             <x-post-form
+                :categories="$categories"
+                :tags="$tags"
                 :action="route('posts.store')"
                 submit-label="Enregistrer l'article"
             />
