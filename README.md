@@ -6,17 +6,12 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (préparation de lab-04)
+## État actuel (tag lab-04b)
 
-- CRUD des articles : liste, détail, création, modification et suppression avec confirmation.
-- Publication et dépublication depuis la page d'un article.
-- Champ `excerpt` facultatif ajouté par une nouvelle migration.
-- Scope `published` appliqué à l'accueil et aux archives.
-- Modèles `Category` et `Tag` reliés à `Post` : une catégorie et un auteur par article, et plusieurs tags associés par une table pivot `post_tag`.
-- Fabriques `PostFactory`, `CategoryFactory`, `TagFactory` et seeders pour un jeu de données réaliste.
-- Chargement anticipé avec `with()` ; `Model::preventLazyLoading()` signale les problèmes N+1 hors production.
-- Tests Pest des lectures, écritures et relations.
-- Base de données SQLite locale (`database/database.sqlite`, non versionnée).
+- Formulaires d'article : catégorie dans une liste déroulante et tags dans des cases à cocher, synchronisés avec `sync()`.
+- Pages publiques par catégorie et par tag, reliées par slug (`{category:slug}`, `{tag:slug}`).
+- Accueil : catégories et tags populaires comptés avec `withCount`, uniquement pour les articles publiés.
+- Tests Pest : `PostPagesTest`, `PostWriteTest`, `PostRelationsTest` et `PostTaxonomyTest`.
 
 ## Données de démonstration
 
@@ -31,6 +26,8 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | GET | `/heure` | `time` | `PageController@time` |
 | GET | `/posts` | `posts.index` | `PostController@index` |
 | GET | `/posts/archive/{year}` | `posts.archive` | `PostController@archive` |
+| GET | `/posts/categorie/{category:slug}` | `posts.category` | `PostController@byCategory` |
+| GET | `/posts/tag/{tag:slug}` | `posts.tag` | `PostController@byTag` |
 | GET | `/posts/create` | `posts.create` | `PostController@create` |
 | POST | `/posts` | `posts.store` | `PostController@store` |
 | GET | `/posts/{post}` | `posts.show` | `PostController@show` |
@@ -118,3 +115,9 @@ Ouvrir ensuite [http://localhost:8000](http://localhost:8000).
 ![Liste des articles avec leur catégorie, leur auteur et leurs tags](screenshots/s07-liste-relations.png)
 
 ![Page d'un article avec ses tags et les articles de la même catégorie](screenshots/s07-detail-tags.png)
+
+### Session 08
+
+![Formulaire de modification avec la catégorie et les tags](screenshots/s08-formulaire-relations.png)
+
+![Page des articles d'une catégorie](screenshots/s08-page-categorie.png)
