@@ -10,6 +10,7 @@ class PageController extends Controller
     {
         return view('home', [
             'latestPosts' => Post::published()
+                ->with('user', 'category', 'tags')
                 ->latest('published_at')
                 ->take(3)
                 ->get(),
