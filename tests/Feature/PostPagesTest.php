@@ -166,13 +166,13 @@ test('posts are paginated four per page', function () {
 });
 
 test('archive shows posts published in the requested year', function () {
-    Post::factory()->create([
+    Post::factory()->published()->create([
         'title' => 'Archive 2025',
         'slug' => 'archive-2025',
         'published_at' => '2025-06-14 12:00:00',
     ]);
 
-    Post::factory()->create([
+    Post::factory()->published()->create([
         'title' => 'Archive 2024',
         'slug' => 'archive-2024',
         'published_at' => '2024-06-14 12:00:00',
