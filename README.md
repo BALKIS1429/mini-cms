@@ -6,14 +6,21 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (préparation de lab-03b)
+## État actuel (préparation de lab-04)
 
 - CRUD des articles : liste, détail, création, modification et suppression avec confirmation.
 - Publication et dépublication depuis la page d'un article.
 - Champ `excerpt` facultatif ajouté par une nouvelle migration.
 - Scope `published` appliqué à l'accueil et aux archives.
-- Tests Pest de lecture et d'écriture : `php artisan test`.
+- Modèles `Category` et `Tag` reliés à `Post` : une catégorie et un auteur par article, et plusieurs tags associés par une table pivot `post_tag`.
+- Fabriques `PostFactory`, `CategoryFactory`, `TagFactory` et seeders pour un jeu de données réaliste.
+- Chargement anticipé avec `with()` ; `Model::preventLazyLoading()` signale les problèmes N+1 hors production.
+- Tests Pest des lectures, écritures et relations.
 - Base de données SQLite locale (`database/database.sqlite`, non versionnée).
+
+## Données de démonstration
+
+Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. Attention : cette commande vide la base avant de la remplir.
 
 ## Routes disponibles
 
@@ -105,3 +112,9 @@ Ouvrir ensuite [http://localhost:8000](http://localhost:8000).
 ![Formulaire de modification prérempli](screenshots/s06-modification.png)
 
 ![Confirmation de suppression](screenshots/s06-suppression.png)
+
+### Session 07
+
+![Liste des articles avec leur catégorie, leur auteur et leurs tags](screenshots/s07-liste-relations.png)
+
+![Page d'un article avec ses tags et les articles de la même catégorie](screenshots/s07-detail-tags.png)
