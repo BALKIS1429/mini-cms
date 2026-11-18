@@ -41,6 +41,16 @@ it('does not create a post without a title', function () {
         ->assertDontSee('value="1" checked', false);
 });
 
+it('shows French validation messages with translated post field names', function () {
+    $this->from(route('posts.create'))
+        ->post(route('posts.store'), ['title' => '', 'slug' => '', 'body' => ''])
+        ->assertSessionHasErrors([
+            'title' => 'Le champ titre est obligatoire.',
+            'slug' => 'Le champ slug est obligatoire.',
+            'body' => 'Le champ contenu est obligatoire.',
+        ]);
+});
+
 it('shows the edit form with the current values', function () {
     $post = Post::factory()->create(postWriteData([
         'title' => 'Titre initial',
