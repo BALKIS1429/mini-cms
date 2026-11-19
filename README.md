@@ -6,12 +6,15 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-05b)
+## État actuel (tag lab-06)
 
-- Back-office des catégories et des tags sous `/admin` (`CategoryController`, `TagController`), protégé par le middleware `writable`, avec Form Requests et messages flash.
+- Inscription, connexion et déconnexion avec les contrôleurs et Form Requests de l'application ; les nouveaux comptes ont le rôle `author`.
+- Les routes d'écriture exigent une session authentifiée. Les articles créés sont associés à leur auteur ; une policy réserve modification, publication et suppression à l'auteur ou à un administrateur.
+- Le rôle `admin` est attribué au compte de démonstration par le seeder. La gestion des catégories sous `/admin/categories` est réservée aux administrateurs ; la gestion des tags exige une connexion.
+- Défi facultatif réalisé : connexion persistante (« Se souvenir de moi ») et page `/mes-articles`, limitée aux articles de l'utilisateur connecté.
 - Messages de validation en français (`lang/fr/validation.php`, `APP_LOCALE=fr`), avec des noms de champs lisibles et un message propre au slug des catégories et des tags.
-- Pages 404 et 503 affichées dans le layout du site (`resources/views/errors`) ; les pages d'article et de catégorie introuvables proposent des liens utiles.
-- Tests Pest : `PostPagesTest`, `PostWriteTest`, `PostRelationsTest`, `PostTaxonomyTest`, `PostFeedbackTest`, `CategoryAdminTest`, `TagAdminTest` et `ErrorPagesTest`.
+- Pages 403, 404 et 503 affichées dans le layout du site (`resources/views/errors`) ; les pages d'article et de catégorie introuvables proposent des liens utiles.
+- Tests Pest : `AuthTest`, `AuthorizationTest` et les tests de pages, d'écriture, de relations, de taxonomie, de retours, d'administration et de pages d'erreur.
 
 ## Données de démonstration
 
@@ -24,6 +27,11 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | GET | `/` | `home` | `PageController@home` |
 | GET | `/a-propos` | `about` | `PageController@about` |
 | GET | `/heure` | `time` | `PageController@time` |
+| GET | `/inscription` | `register` | `RegisterController@create` |
+| POST | `/inscription` | - | `RegisterController@store` |
+| GET | `/connexion` | `login` | `LoginController@create` |
+| POST | `/connexion` | - | `LoginController@store` |
+| POST | `/deconnexion` | `logout` | `LoginController@destroy` |
 | GET | `/posts` | `posts.index` | `PostController@index` |
 | GET | `/posts/archive/{year}` | `posts.archive` | `PostController@archive` |
 | GET | `/posts/categorie/{category:slug}` | `posts.category` | `PostController@byCategory` |
@@ -35,6 +43,7 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | PUT/PATCH | `/posts/{post}` | `posts.update` | `PostController@update` |
 | DELETE | `/posts/{post}` | `posts.destroy` | `PostController@destroy` |
 | PATCH | `/posts/{post}/publication` | `posts.publication` | `PostController@togglePublication` |
+| GET | `/mes-articles` | `posts.mine` | `PostController@myPosts` |
 | GET | `/admin/categories` | `admin.categories.index` | `CategoryController@index` |
 | GET | `/admin/categories/create` | `admin.categories.create` | `CategoryController@create` |
 | POST | `/admin/categories` | `admin.categories.store` | `CategoryController@store` |
@@ -47,6 +56,8 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | GET | `/admin/tags/{tag}/edit` | `admin.tags.edit` | `TagController@edit` |
 | PUT/PATCH | `/admin/tags/{tag}` | `admin.tags.update` | `TagController@update` |
 | DELETE | `/admin/tags/{tag}` | `admin.tags.destroy` | `TagController@destroy` |
+
+Les pages publiques des articles restent accessibles sans compte. Les routes de création et de gestion des articles et des tags exigent une connexion ; la gestion des catégories exige le rôle `admin`.
 
 ## Prérequis
 
@@ -147,3 +158,9 @@ Back-office des catégories et des tags, messages de validation en français, pa
 ![Formulaire de catégorie envoyé vide, avec les messages de validation en français](screenshots/s10-validation.png)
 
 ![Page 404 du site pour une adresse inconnue](screenshots/s10-404.png)
+
+### Session 11
+
+![Connexion réussie avec le compte de démonstration](screenshots/s11-connexion.png)
+
+![Accès interdit à l'administration des catégories pour un auteur](screenshots/s11-interdit.png)
