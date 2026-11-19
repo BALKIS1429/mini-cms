@@ -15,6 +15,10 @@
                 <x-nav-link to="admin.categories.index">Catégories</x-nav-link>
             @endcan
 
+            @can('manage-tags')
+                <x-nav-link to="admin.tags.index" match="admin.tags.*">Tags</x-nav-link>
+            @endcan
+
             <span class="ml-auto text-sm text-gray-600">Connecté : {{ auth()->user()->name }}</span>
 
             <form method="POST" action="{{ route('logout') }}">
