@@ -39,7 +39,7 @@ it('assigns a new post to the authenticated author regardless of submitted owner
 it('allows authors to edit their own posts but denies other authors', function () {
     $owner = User::factory()->create();
     $otherAuthor = User::factory()->create();
-    $post = Post::factory()->create(['user_id' => $owner->id]);
+    $post = Post::factory()->published()->create(['user_id' => $owner->id]);
 
     $this->actingAs($otherAuthor)
         ->get(route('posts.edit', $post))
@@ -128,7 +128,7 @@ it('limits category administration to admins', function () {
 it('shows post management controls only to an owner or admin', function () {
     $owner = User::factory()->create();
     $visitor = User::factory()->create();
-    $post = Post::factory()->create(['user_id' => $owner->id]);
+    $post = Post::factory()->published()->create(['user_id' => $owner->id]);
 
     $this->get(route('posts.show', $post))
         ->assertOk()

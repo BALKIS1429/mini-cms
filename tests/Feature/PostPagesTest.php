@@ -154,7 +154,7 @@ test('post can be created as a draft without an excerpt', function () {
 
 test('posts are paginated four per page', function () {
     foreach (range(1, 5) as $number) {
-        Post::factory()->create([
+        Post::factory()->published()->create([
             'title' => "Article {$number}",
             'slug' => "article-{$number}",
         ]);
