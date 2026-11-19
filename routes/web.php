@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
@@ -40,7 +40,7 @@ Route::middleware(['writable', 'auth'])->group(function () {
     Route::patch('/posts/{post}/publication', [PostController::class, 'togglePublication'])
         ->name('posts.publication');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::resource('categories', CategoryController::class)->except('show');
         Route::resource('tags', TagController::class)->except('show');
     });
