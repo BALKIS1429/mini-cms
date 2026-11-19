@@ -6,5 +6,25 @@
         <x-nav-link to="posts.index" match="posts.*">Articles</x-nav-link>
         <x-nav-link to="time">Heure</x-nav-link>
         <x-nav-link to="about">À propos</x-nav-link>
+
+        @auth
+            <x-nav-link to="posts.create">Nouvel article</x-nav-link>
+            <x-nav-link to="posts.mine">Mes articles</x-nav-link>
+
+            @can('manage-categories')
+                <x-nav-link to="admin.categories.index">Catégories</x-nav-link>
+            @endcan
+
+            <span class="ml-auto text-sm text-gray-600">Connecté : {{ auth()->user()->name }}</span>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="text-sm text-indigo-600 hover:underline">Déconnexion</button>
+            </form>
+        @else
+            <span class="ml-auto"></span>
+            <x-nav-link to="login">Connexion</x-nav-link>
+            <x-nav-link to="register">Inscription</x-nav-link>
+        @endauth
     </nav>
 </header>

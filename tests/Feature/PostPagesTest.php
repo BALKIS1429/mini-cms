@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -53,12 +54,14 @@ test('home displays only the three latest published posts', function () {
 });
 
 test('edit form submits the title to the update route', function () {
+    $user = User::factory()->create();
     $post = Post::factory()->create([
         'title' => 'Titre initial',
         'slug' => 'titre-initial',
+        'user_id' => $user->id,
     ]);
 
-    $response = $this->get(route('posts.edit', $post));
+    $response = $this->actingAs($user)->get(route('posts.edit', $post));
 
     $response->assertOk();
     $response->assertSee('name="title"', false);
@@ -68,6 +71,7 @@ test('edit form submits the title to the update route', function () {
 });
 
 test('post can be updated through the HTTP route including its title', function () {
+    $this->actingAs(User::factory()->admin()->create());
     $post = Post::factory()->create([
         'title' => 'Titre avant modification',
         'slug' => 'titre-avant-modification',
@@ -94,6 +98,7 @@ test('post can be updated through the HTTP route including its title', function 
 });
 
 test('post update rejects a slug already used by another post', function () {
+    $this->actingAs(User::factory()->admin()->create());
     $post = Post::factory()->create([
         'title' => 'Article à conserver',
         'slug' => 'article-a-conserver',
@@ -119,7 +124,8 @@ test('post update rejects a slug already used by another post', function () {
 });
 
 test('post can be created as a draft without an excerpt', function () {
-    $response = $this->post(route('posts.store'), [
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)->post(route('posts.store'), [
         'title' => 'Nouveau brouillon',
         'slug' => 'nouveau-brouillon',
         'body' => 'Contenu suffisamment long pour créer un article brouillon.',
@@ -133,6 +139,7 @@ test('post can be created as a draft without an excerpt', function () {
         'excerpt' => null,
         'is_published' => false,
         'published_at' => null,
+        'user_id' => $user->id,
     ]);
 
     $this->get(route('posts.show', $post))

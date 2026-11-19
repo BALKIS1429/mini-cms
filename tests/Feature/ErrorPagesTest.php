@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\User;
 
 beforeEach(function () {
     $this->withoutVite();
@@ -16,6 +17,7 @@ it('shows the styled 404 page for an unknown URL', function () {
 
 it('shows the styled 503 page when the site is read-only', function () {
     config(['site.read_only' => true]);
+    $this->actingAs(User::factory()->create());
 
     $this->post(route('admin.categories.store'), [])
         ->assertServiceUnavailable()

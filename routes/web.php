@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
@@ -22,8 +24,19 @@ Route::get('/posts/categorie/{category:slug}', [PostController::class, 'byCatego
 Route::get('/posts/tag/{tag:slug}', [PostController::class, 'byTag'])
     ->name('posts.tag');
 
-Route::middleware('writable')->group(function () {
-    Route::resource('posts', PostController::class);
+Route::middleware('guest')->group(function () {
+    Route::get('/inscription', [RegisterController::class, 'create'])->name('register');
+    Route::post('/inscription', [RegisterController::class, 'store']);
+    Route::get('/connexion', [LoginController::class, 'create'])->name('login');
+    Route::post('/connexion', [LoginController::class, 'store']);
+});
+
+Route::post('/deconnexion', [LoginController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
+
+Route::middleware(['writable', 'auth'])->group(function () {
+    Route::resource('posts', PostController::class)->except(['index', 'show']);
     Route::patch('/posts/{post}/publication', [PostController::class, 'togglePublication'])
         ->name('posts.publication');
 
@@ -32,3 +45,10 @@ Route::middleware('writable')->group(function () {
         Route::resource('tags', TagController::class)->except('show');
     });
 });
+
+Route::get('/mes-articles', [PostController::class, 'myPosts'])
+    ->middleware('auth')
+    ->name('posts.mine');
+
+Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');

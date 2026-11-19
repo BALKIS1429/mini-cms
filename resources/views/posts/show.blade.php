@@ -8,7 +8,8 @@
                 Retour aux articles
             </a>
 
-            <div class="flex flex-wrap items-center gap-3">
+            @can('update', $post)
+                <div class="flex flex-wrap items-center gap-3">
                 <a
                     href="{{ route('posts.edit', $post) }}"
                     class="inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
@@ -37,7 +38,8 @@
                         <button type="submit" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Confirmer la suppression</button>
                     </form>
                 </details>
-            </div>
+                </div>
+            @endcan
         </div>
 
         <h1 class="text-3xl font-bold mt-4 mb-2">{{ $post->title }}</h1>

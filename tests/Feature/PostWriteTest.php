@@ -1,6 +1,11 @@
 <?php
 
 use App\Models\Post;
+use App\Models\User;
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->admin()->create());
+});
 
 function postWriteData(array $overrides = []): array
 {
@@ -24,6 +29,7 @@ it('creates a post from the form', function () {
         'excerpt' => 'Un extrait court.',
         'is_published' => false,
         'published_at' => null,
+        'user_id' => auth()->id(),
     ]);
 });
 

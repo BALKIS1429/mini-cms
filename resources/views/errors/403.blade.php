@@ -1,5 +1,14 @@
-@extends('errors::minimal')
+<x-layout>
+    <x-slot:title>Accès interdit - Mini-CMS</x-slot:title>
 
-@section('title', __('Forbidden'))
-@section('code', '403')
-@section('message', __($exception->getMessage() ?: 'Forbidden'))
+    <h1 class="text-3xl font-bold text-gray-900">Accès interdit</h1>
+    <p class="mt-2 mb-8 text-gray-600">Vous n'avez pas les autorisations nécessaires pour accéder à cette page.</p>
+
+    <x-alert type="warning" title="Erreur 403" class="max-w-2xl">
+        Connectez-vous avec un compte autorisé, ou retournez à l'accueil.
+    </x-alert>
+
+    <p class="mt-6">
+        <a href="{{ route('home') }}" class="font-medium text-indigo-600 hover:underline">Retour à l'accueil</a>
+    </p>
+</x-layout>
