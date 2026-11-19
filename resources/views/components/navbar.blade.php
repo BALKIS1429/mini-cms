@@ -19,6 +19,10 @@
                 <x-nav-link to="admin.tags.index" match="admin.tags.*">Tags</x-nav-link>
             @endcan
 
+            @can('manage-categories')
+                <x-nav-link to="admin.users.index" match="admin.users.*">Utilisateurs</x-nav-link>
+            @endcan
+
             <span class="ml-auto text-sm text-gray-600">Connecté : {{ auth()->user()->name }}</span>
 
             <form method="POST" action="{{ route('logout') }}">
