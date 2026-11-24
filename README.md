@@ -6,14 +6,14 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-06b)
+## État actuel (tag lab-07)
 
-- Middleware `admin` (`App\Http\Middleware\EnsureUserIsAdmin`) sur tout `/admin` : un auteur reçoit 403 « Réservé aux administrateurs. ».
-- Gate `manage-tags`, comme `manage-categories` : contrôleur, Form Requests et menu.
-- Brouillons protégés : `PostPolicy::view` et le scope `visibleTo` ; un brouillon n'est visible que par son auteur et les administrateurs.
-- Tests d'autorisation : `AdminAccessTest` (7 tests), `PostVisibilityTest` (5 tests) et `UserRoleTest` (2 tests), en plus des tests de la session 11.
-- Comparaison écrite avec le starter kit Livewire (section ci-dessous).
-- Défi facultatif : la page `/admin/utilisateurs` permet aux administrateurs de gérer les rôles sans modifier leur propre rôle.
+- API JSON en lecture seule, installée avec `php artisan install:api` (Sanctum installé ; les jetons arrivent en session 14).
+- `GET /api/posts` : articles publiés, paginés (`?per_page=` de 1 à 50, 5 par défaut), avec auteur et catégorie.
+- `GET /api/posts/{post}` : un article publié ; un brouillon renvoie 403 et un numéro inconnu 404, en JSON.
+- Réponses mises en forme par `PostResource` et `CategoryResource` : ni e-mail ni rôle des auteurs, dates ISO 8601.
+- Testée avec Postman et `curl.exe -H "Accept: application/json"`.
+- Défi facultatif : `tags` (noms) dans chaque article et `body` réservé à la page d'un article.
 
 ## Données de démonstration
 
@@ -57,6 +57,8 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | DELETE | `/admin/tags/{tag}` | `admin.tags.destroy` | `TagController@destroy` |
 | GET | `/admin/utilisateurs` | `admin.users.index` | `UserRoleController@index` |
 | PATCH | `/admin/utilisateurs/{user}/role` | `admin.users.role` | `UserRoleController@updateRole` |
+| GET | `/api/posts` | `api.posts.index` | `Api\PostController@index` |
+| GET | `/api/posts/{post}` | `api.posts.show` | `Api\PostController@show` |
 
 Les articles publiés sont publics ; un brouillon n'est visible que par son auteur ou un administrateur. Les routes de création et de gestion des articles exigent une connexion. Toute la zone `/admin` est réservée aux administrateurs.
 
@@ -171,6 +173,12 @@ Back-office des catégories et des tags, messages de validation en français, pa
 ![Page 403 « Réservé aux administrateurs. » pour un auteur sur /admin/tags](screenshots/s12-admin-interdit.png)
 
 ![Barre de navigation d'un auteur sans les liens Catégories et Tags](screenshots/s12-menu-auteur.png)
+
+### Session 13
+
+![Réponse JSON de GET /api/posts?per_page=2, avec data, links et meta](screenshots/s13-postman-liste.png)
+
+![Réponse 422 de GET /api/posts?per_page=500, avec le message en français](screenshots/s13-postman-422.png)
 
 ## Comparaison avec le starter kit Livewire
 
