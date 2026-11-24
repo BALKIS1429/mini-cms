@@ -21,6 +21,8 @@ class PostController extends Controller
 
         $posts = Post::published()
             ->with('user', 'category', 'tags')
+            ->when($request->validated('category'), fn (Builder $query, string $slug) => $query->whereRelation('category', 'slug', $slug))
+            ->when($request->validated('tag'), fn (Builder $query, string $slug) => $query->whereRelation('tags', 'slug', $slug))
             ->latest('id')
             ->paginate($perPage)
             ->withQueryString();

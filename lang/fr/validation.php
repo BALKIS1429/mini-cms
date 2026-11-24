@@ -26,6 +26,7 @@ return [
 
     'attributes' => [
         'body' => 'contenu',
+        'category' => 'catégorie',
         'category_id' => 'catégorie',
         'excerpt' => 'extrait',
         'email' => 'adresse e-mail',
