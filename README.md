@@ -6,15 +6,14 @@ Auteur : Balkis Riahi, groupe MDW33.
 
 Mini-CMS évoluera au fil du semestre vers une petite plateforme de publication : pages publiques, back-office authentifié, API JSON et tests Pest. Chaque session se termine par un tag Git (`lab-01`, `lab-01b`, puis un tag par session).
 
-## État actuel (tag lab-06)
+## État actuel (tag lab-06b)
 
-- Inscription, connexion et déconnexion avec les contrôleurs et Form Requests de l'application ; les nouveaux comptes ont le rôle `author`.
-- Les routes d'écriture exigent une session authentifiée. Les articles créés sont associés à leur auteur ; une policy réserve modification, publication et suppression à l'auteur ou à un administrateur.
-- Le rôle `admin` est attribué au compte de démonstration par le seeder. La gestion des catégories sous `/admin/categories` est réservée aux administrateurs ; la gestion des tags exige une connexion.
-- Défi facultatif réalisé : connexion persistante (« Se souvenir de moi ») et page `/mes-articles`, limitée aux articles de l'utilisateur connecté.
-- Messages de validation en français (`lang/fr/validation.php`, `APP_LOCALE=fr`), avec des noms de champs lisibles et un message propre au slug des catégories et des tags.
-- Pages 403, 404 et 503 affichées dans le layout du site (`resources/views/errors`) ; les pages d'article et de catégorie introuvables proposent des liens utiles.
-- Tests Pest : `AuthTest`, `AuthorizationTest` et les tests de pages, d'écriture, de relations, de taxonomie, de retours, d'administration et de pages d'erreur.
+- Middleware `admin` (`App\Http\Middleware\EnsureUserIsAdmin`) sur tout `/admin` : un auteur reçoit 403 « Réservé aux administrateurs. ».
+- Gate `manage-tags`, comme `manage-categories` : contrôleur, Form Requests et menu.
+- Brouillons protégés : `PostPolicy::view` et le scope `visibleTo` ; un brouillon n'est visible que par son auteur et les administrateurs.
+- Tests d'autorisation : `AdminAccessTest` (7 tests), `PostVisibilityTest` (5 tests) et `UserRoleTest` (2 tests), en plus des tests de la session 11.
+- Comparaison écrite avec le starter kit Livewire (section ci-dessous).
+- Défi facultatif : la page `/admin/utilisateurs` permet aux administrateurs de gérer les rôles sans modifier leur propre rôle.
 
 ## Données de démonstration
 
@@ -56,8 +55,10 @@ Après un clone, reconstruire la base avec `php artisan migrate:fresh --seed`. A
 | GET | `/admin/tags/{tag}/edit` | `admin.tags.edit` | `TagController@edit` |
 | PUT/PATCH | `/admin/tags/{tag}` | `admin.tags.update` | `TagController@update` |
 | DELETE | `/admin/tags/{tag}` | `admin.tags.destroy` | `TagController@destroy` |
+| GET | `/admin/utilisateurs` | `admin.users.index` | `UserRoleController@index` |
+| PATCH | `/admin/utilisateurs/{user}/role` | `admin.users.role` | `UserRoleController@updateRole` |
 
-Les pages publiques des articles restent accessibles sans compte. Les routes de création et de gestion des articles et des tags exigent une connexion ; la gestion des catégories exige le rôle `admin`.
+Les articles publiés sont publics ; un brouillon n'est visible que par son auteur ou un administrateur. Les routes de création et de gestion des articles exigent une connexion. Toute la zone `/admin` est réservée aux administrateurs.
 
 ## Prérequis
 
@@ -164,3 +165,26 @@ Back-office des catégories et des tags, messages de validation en français, pa
 ![Connexion réussie avec le compte de démonstration](screenshots/s11-connexion.png)
 
 ![Accès interdit à l'administration des catégories pour un auteur](screenshots/s11-interdit.png)
+
+### Session 12
+
+![Page 403 « Réservé aux administrateurs. » pour un auteur sur /admin/tags](screenshots/s12-admin-interdit.png)
+
+![Barre de navigation d'un auteur sans les liens Catégories et Tags](screenshots/s12-menu-auteur.png)
+
+## Comparaison avec le starter kit Livewire
+
+| Fonction | Mini-CMS (authentification manuelle) | Starter kit Livewire |
+|---|---|---|
+| Routes d'authentification | `/inscription`, `/connexion` et `/deconnexion` sont déclarées dans `routes/web.php`. | Fortify enregistre les routes depuis son paquet ; elles ne sont pas déclarées dans `routes/web.php`. |
+| Inscription | `RegisterController`, `RegisterRequest` et `Hash::make`. | `app/Actions/Fortify/CreateNewUser.php` valide puis crée l'utilisateur ; écran Livewire dans `resources/views/pages/auth/register.blade.php`. |
+| Connexion | `LoginController::store` appelle `Auth::attempt`, puis régénère la session. | Contrôleur Fortify et `resources/views/pages/auth/login.blade.php`. |
+| Déconnexion | `LoginController::destroy` appelle `Auth::logout`, `invalidate()` et `regenerateToken()`. | Route Fortify et `app/Livewire/Actions/Logout.php` effectuent ces opérations. |
+| Limitation des tentatives | Aucune limitation n'est configurée dans Mini-CMS. | Cinq tentatives par minute et par e-mail/adresse IP via `FortifyServiceProvider`. |
+| Mot de passe oublié | Non implémenté. | `Features::resetPasswords()` dans `config/fortify.php`. |
+| Vérification de l'e-mail | Non implémentée. | `Features::emailVerification()`, `MustVerifyEmail` et le middleware `verified`. |
+| Double authentification | Non implémentée. | `Features::twoFactorAuthentication()` et `Features::passkeys()`. |
+| Rôles et autorisations | Rôle `role`, middleware `admin`, Gates et Policies adaptés au CMS. | Les autorisations propres au domaine restent à écrire. |
+| Tests | `AuthTest`, `AuthorizationTest`, `AdminAccessTest`, `PostVisibilityTest`, `UserRoleTest` et les autres tests Pest de l'application. | Dix fichiers `tests/Feature` (Auth, Settings, Dashboard), écrits avec PHPUnit dans le dépôt du kit. |
+
+Dans un vrai projet, je garderais du kit la limitation des tentatives, la réinitialisation du mot de passe, la vérification de l'e-mail et le double facteur, pour éviter de réinventer ces protections. Je conserverais les Gates, Policies et le middleware propres à l'application, car aucun starter kit ne connaît les rôles métier de Mini-CMS.
